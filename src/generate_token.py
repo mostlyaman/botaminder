@@ -25,9 +25,6 @@ def manual():
     s_name=[]
     s_st=[]
     s_et=[]
-    st1=''
-    et1=''
-    n=''
     global mode
     
     def writeprofile():
