@@ -29,15 +29,16 @@ def manual():
     
     def writeprofile():
         lt=(time.localtime(time.time())[3:6])
-        profname=input('enter the profile name in the format <profile"x">:')
-        profiles=os.listdir(str(os.path.join(os.getcwd())+'profiles')).remove('.gitignore.txt')
+        profname=input('enter the profile name:')
+        profiles=os.listdir(os.path.join(os.getcwd(),'profiles'))
+        profiles.pop(profiles.index('.gitignore.txt'))
         def writing():
-            no=int(input('enter the number of events'))
+            no=int(input('enter the number of events: '))
             for i in range(no):
                 q='enter the title of event '+str(i+1)+':'
                 name=input(q)
-                st=(input('enter start time seperated by <:>:'))
-                et=(input('enter end time seperated by <:>:'))
+                st=(input('enter start time seperated by ":" :').split(':'))
+                et=(input('enter end time seperated by ":" :').split(':'))
                 s_name.append(name)
                 s_st.append(st)
                 s_et.append(et)
@@ -59,44 +60,51 @@ def manual():
             file.write('long eventStartTime[2] = {'+st1+'};\n')
             file.write('long eventEndTime[2] = {'+et1+'};\n')
             file.write('int eventScrollingSpeed = 4;'+'\n'+\
-                       'long waterReminder = 3*3600;'+'\n'+\
-                       'long breakReminder = 4*3600;'+'\n'+\
-                       'long skippingBreak = 17*3600;\n')
+                       'long waterReminder = (long)3*3600;'+'\n'+\
+                       'long breakReminder = (long)4*3600;'+'\n'+\
+                       'long skippingBreak = (long)17*3600;\n')
             file.write('String userMode = "'+mode+'";')
-            file = open("profile1.txt", 'r')
+            file = open(os.path.join(os.getcwd(),'profiles',profname+'.txt'), 'r')
             print(file.read())
             print('\n\n')
             file.close()
         if not profiles:
             writing()
         else:
-            if profname not in profiles:
+            if profname+'.txt' not in profiles:
+                print(profname)
                 writing()
             else:
                 print('profile already exists enter a new name')
                 writeprofile()
     
     def chooseprofile():
-        profiles= os.listdir(str(os.path.join(os.getcwd())+'profiles')).remove('.gitignore.txt')
+        profiles= os.listdir(str(os.path.join(os.getcwd(),'profiles')))
+        profiles.pop(profiles.index('.gitignore.txt'))
         count=1
         print('select the profile from the list below:\n')
         for i in profiles:
             print(str(count)+'. '+i)
             count+=1
-        profname=int(input(':'))
-        if profname-1 in len(profiles):
-            file=open(profiles[profname-1])
+        profname=int(input('enter the number of the profile:'))
+        if profname-1 < len(profiles):
+            file=open(os.path.join(os.getcwd(),'profiles',profiles[profname-1]))
             print(file.read())
             file.close()
             print('\n\n')
+        else:
+            print('\n\nyou entered wrong input, please try again.\n---------------------------------\n')
+            chooseprofile()
         
             
     print('Please select an option from the list : ','\n','1 --> choose a profile','\n','2 --> create a new profile','\n',\
           '3 --> input manually')
 
-    profileoption= input(':') 
+    profileoption= input('select the option:') 
     if profileoption=='1' or profileoption=='choose a profile':
-        if not os.listdir(str(os.getcwd())+'\profiles').remove('.gitignore.txt'):
+        profiles=os.listdir(str(os.getcwd())+'\profiles')
+        profiles.pop(profiles.index('.gitignore.txt'))
+        if not profiles:
             print('\n\nno profiles found try again\n\n')
             manual()
         chooseprofile()   
@@ -131,9 +139,9 @@ def manual():
         print('long eventStartTime[2] = {',st1,'};')
         print('long eventEndTime[2] = {',et1,'};')
         print('int eventScrollingSpeed = 4;'+'\n'+\
-            'long waterReminder = 3*3600;'+'\n'+\
-            'long breakReminder = 4*3600;'+'\n'+\
-            'long skippingBreak = 17*3600;')
+            'long waterReminder = (long)3*3600;'+'\n'+\
+            'long breakReminder = (long)4*3600;'+'\n'+\
+            'long skippingBreak = (long)17*3600;')
         print('String userMode = "'+mode+'";')
         print('\n\n')
     else:
@@ -313,9 +321,9 @@ def googlecalendar():
     file.write('long eventStartTime[2] = {',st1,'};')
     file.write('long eventEndTime[2] = {',et1,'};')
     file.write('int eventScrollingSpeed = 4;'+'\n'+\
-               'long waterReminder = 3*3600;'+'\n'+\
-               'long breakReminder = 4*3600;'+'\n'+\
-               'long skippingBreak = 17*3600;')
+               'long waterReminder = (long)3*3600;'+'\n'+\
+               'long breakReminder = (long)4*3600;'+'\n'+\
+               'long skippingBreak = (long)17*3600;')
     file = open("profile1.txt", 'r')
     print(file.read())
     file.close()

@@ -1,0 +1,13 @@
+COPY THIS TOKEN TO ARDUINO SKETCH
+
+
+long time[3] = {22,8,56};
+int events = 1;
+String eventName[1] = {"event1"};
+long eventStartTime[2] = {(long)1*3600+(long)00*60};
+long eventEndTime[2] = {(long)2*3600+(long)00*60};
+int eventScrollingSpeed = 4;
+long waterReminder = (long)3*3600;
+long breakReminder = (long)4*3600;
+long skippingBreak = (long)17*3600;
+String userMode = "manual";
