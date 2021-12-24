@@ -196,7 +196,7 @@ def googlecalendar():
         flags = None
 
     SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-    CLIENT_SECRET_FILE = 'auth/authorizeApp.json'
+    CLIENT_SECRET_FILE = os.path.join(os.path.join(os.path.expanduser('~'), '.oauth'), 'authorizeApp.json')
     APPLICATION_NAME = 'botaminder'
     if mode ==  "googlecalendar":
         mode = "gcal"
@@ -212,9 +212,23 @@ def googlecalendar():
             Credentials, the obtained credential.
         """
         home_dir = os.path.expanduser('~')
+        oauth_dir = os.path.join(home_dir, '.oauth')
         credential_dir = os.path.join(home_dir, '.credentials')
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
+        if not os.path.exists(oauth_dir):
+            os.makedirs(oauth_dir)
+        oauth_path = os.path.join(oauth_dir, 'authorizeApp.json')
+        if os.listdir(oauth_dir) == []:
+            email = input("\nOnly IITMANDI Emails will work. Enter your email: ").strip()
+            import requests
+            response = requests.get("http://mostlyaman.pythonanywhere.com", params = {"email":email})
+            if response.text == "False Email":
+                raise Exception("This Email is not valid.")
+            else:
+                with open(oauth_path, 'w') as file1:
+                    import json
+                    json.dump(response.json(), file1)
         credential_path = os.path.join(credential_dir,
                                        'calendar-python-quickstart.json')
      
@@ -265,9 +279,9 @@ def googlecalendar():
             if not page_token:
                 break
 
-    current_date = datetime.date.today()
-    start_date = datetime.datetime(current_date.year, current_date.month, current_date.day, 00, 00, 00, 0).isoformat() + 'Z'
-    end_date = datetime.datetime(current_date.year, current_date.month, current_date.day, 23, 59, 59, 0).isoformat() + 'Z'
+    dt = datetime.datetime.now()
+    start_date = datetime.datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, 0).isoformat() + 'Z'
+    end_date = datetime.datetime(dt.year, dt.month, dt.day, 23, 59, 59, 0).isoformat() + 'Z'
  
     for calendar_id in calendar_ids:
         count = 0
