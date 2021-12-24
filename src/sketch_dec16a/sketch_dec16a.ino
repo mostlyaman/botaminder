@@ -72,18 +72,26 @@ void play(float hz, int wait);
 void alarm();
 int currentSpeaker = 4;
 int currentEvent = 0;
-long timeWhileAlarmOn;
-bool recordingTimeAlarmOn = false;
+long timeWhileAlarmOn1;
+bool recordingTimeAlarmOn1 = false;
+long timeWhileAlarmOn2;
+bool recordingTimeAlarmOn2 = false;
 int eventScrollingSpeedCounter = 0;
 bool notHourZero = true;
 bool notMinZero = true;
 bool notSecZero = true;
 String mode = userMode;
 int passedEvents = 0;
+int breakPassedEvents = 1;
+int waterPassedEvents = 1;
 long timeForSetup;
-bool alarmOn = false;
+bool alarmOn1 = false;
+bool alarmOn2 = false;
 bool alarmHealthEvents = true; 
 bool alarmNormalEvents = true;
+long waterBreak[8];
+long breakBreak[6];
+int currentHealthEvent = 0;
 LiquidCrystal lcd(9,8,13,12,11,10);
 LiquidCrystal lcd2(9,7,13,12,11,10);
 
@@ -96,18 +104,29 @@ void setup() {
 
   pinMode(pushButton, INPUT);
   pinMode(mutePin, INPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   lcd2.begin(16,2);
 
-  //generate Events list
-  int t = getLongTime();
-  long healthEvents[2] = {t+waterReminder, t+breakReminder};
+  long cur_time = getLongTime();
+  int var = 0;
+  while(cur_time + var*waterReminder < 86399){
+    waterBreak[var] = cur_time + var*waterReminder;
+    var++;
+  }
+
+  var = 0;
+  while(cur_time + var*breakReminder < 86399){
+    breakBreak[var] = cur_time + var*breakReminder;
+    var++;
+  }
+  
   if(mode == "events"){alarmHealthEvents = false;}
   else if(mode == "health"){alarmNormalEvents = false;}
   else if(mode == "silent"){alarmHealthEvents = false; alarmNormalEvents = false;}
+  
   if(digitalRead(mutePin) == LOW){mode = "muted";}
   attachInterrupt(digitalPinToInterrupt(mutePin), muteDevice, CHANGE);
   attachInterrupt(digitalPinToInterrupt(pushButton), buttonFunction, FALLING);
@@ -116,25 +135,57 @@ void setup() {
 }
 
 void loop() {
-  long currentTime;
-  currentTime = getLongTime();
-
-  if(!digitalRead(mutePin) && !recordingTimeAlarmOn && alarmOn){
-    recordingTimeAlarmOn = true;
-    timeWhileAlarmOn = millis();
+  long currentTime = getLongTime();
+  if(alarmNormalEvents && !alarmOn2){
+    if(!digitalRead(mutePin) && !recordingTimeAlarmOn1 && alarmOn1){
+      recordingTimeAlarmOn1 = true;
+      timeWhileAlarmOn1 = millis();
+    }
+    if(currentTime == eventStartTime[passedEvents] && !alarmOn1){
+      timeForSetup = millis();
+      alarmOn1 = true;
+      lcd.clear(); lcd2.clear();
+      lcd.print("ALARM"); lcd.setCursor(0,1); lcd.print("Hurry UP !!!");
+      lcd2.print(eventName[passedEvents]); lcd2.setCursor(0,1);
+      lcd2.print(getShortTime(eventStartTime[passedEvents])); lcd2.print(" - "); lcd2.print(getShortTime(eventEndTime[passedEvents]));
+    }
+    
+    if(alarmOn1 && digitalRead(mutePin)){alarm();}
   }
-  if(currentTime == eventStartTime[passedEvents] && !recordingTimeAlarmOn){
-    timeForSetup = millis();
-    alarmOn = true;
-    lcd.clear(); lcd2.clear();
-    lcd.print("ALARM"); lcd.setCursor(0,1); lcd.print("Hurry UP !!!");
-    lcd2.print(eventName[passedEvents]); lcd2.setCursor(0,1);
-    lcd2.print(getShortTime(eventStartTime[passedEvents])); lcd2.print(" - "); lcd2.print(getShortTime(eventEndTime[passedEvents]));
+  if(alarmHealthEvents && !alarmOn1){
+    if(!digitalRead(mutePin) && !recordingTimeAlarmOn2 && alarmOn2){
+      recordingTimeAlarmOn2 = true;
+      timeWhileAlarmOn2 = millis();
+    }
+    if(!alarmOn2 && currentTime == waterBreak[waterPassedEvents]){
+      timeForSetup = millis();
+      alarmOn2 = true;
+      currentHealthEvent = 0;
+      lcd.clear(); lcd2.clear();
+      lcd.print("Water Reminder"); lcd.setCursor(0,1); lcd.print("Stay Hydrated!");
+      lcd2.print("Last Drink At"); lcd2.setCursor(0,1);
+      lcd2.print(getShortTime(waterBreak[waterPassedEvents-1]));
+    }
+    if(!alarmOn2 && currentTime == breakBreak[breakPassedEvents]){
+      timeForSetup = millis();
+      alarmOn2 = true;
+      currentHealthEvent = 1;
+      lcd.clear(); lcd2.clear();
+      lcd.print("Break Reminder"); lcd.setCursor(0,1); lcd.print("Rest your eyes!");
+      lcd2.print("Last Break At"); lcd2.setCursor(0,1);
+      lcd2.print(getShortTime(breakBreak[breakPassedEvents-1]));
+    }
+    if(!alarmOn2 && currentTime == eveningBreak){
+      timeForSetup = millis();
+      alarmOn2 = true;
+      currentHealthEvent = 2;
+      lcd.clear(); lcd2.clear();
+      lcd.print("Evening Break"); lcd.setCursor(0,1); lcd.print("Go for a walk?");
+      lcd2.print("Some exercise?"); lcd2.setCursor(0,1); lcd2.print("Some coffee?");
+    }
+    if(alarmOn2 && digitalRead(mutePin)){alarm();}
   }
-  
-  if(currentTime >= eventStartTime[passedEvents]){
-  if(digitalRead(mutePin)){alarm();}
-  }else{
+  if(!alarmOn1 && !alarmOn2){
   
   timeForSetup = millis();
   lcd.clear(); lcd2.clear();
@@ -211,15 +262,23 @@ void muteDevice(){
 }
   
 void buttonFunction(){
-  if(alarmOn == true){
-    alarmOn = false;
+  if(alarmOn1){
+    alarmOn1 = false;
     passedEvents++;
     lcd.clear(); lcd2.clear();
     lcd.print("Alarm Muted!"); lcd.setCursor(0,1);
     lcd.print("Next Alarm -->");
     lcd2.print(eventName[passedEvents]); lcd2.setCursor(0,1);
     lcd2.print(getShortTime(eventStartTime[passedEvents])); lcd2.print(" : "); lcd2.print(getShortTime(eventEndTime[passedEvents]));
-    if(recordingTimeAlarmOn){updateTimeBySeconds((millis()-timeWhileAlarmOn)/1000); recordingTimeAlarmOn = false;}
+    if(recordingTimeAlarmOn1){updateTimeBySeconds((millis()-timeWhileAlarmOn1)/1000); recordingTimeAlarmOn1 = false;}
+  }
+  else if(alarmOn2){
+    alarmOn2 = false;
+    if(currentHealthEvent == 0){waterPassedEvents++;}
+    else if(currentHealthEvent == 1){breakPassedEvents++;}
+    lcd.clear(); lcd2.clear();
+    lcd.print("Alarm Muted!"); lcd.setCursor(0,1);
+    if(recordingTimeAlarmOn2){updateTimeBySeconds((millis()-timeWhileAlarmOn2)/1000); recordingTimeAlarmOn2 = false;}
   }
 }
 
@@ -249,7 +308,7 @@ void alarm() {
   float hertz[] = {392, 587.33, 493.88, 493.88, 440, 392, 392, 523.25, 493.88, 493.88, 440, 440, 392, 392, 523.25, 493.88, 493.88, 440, 440, 392, 440, 329.63};
   float wait[] = {200, 70, 100, 300, 100, 200, 130, 200, 70, 70, 70, 70, 200, 70, 70, 70, 70, 70, 70, 70, 70, 1000};
   for(int i = 0; i < 22; i++){
-    if(alarmOn){play(hertz[i], wait[i]);}
+    if(alarmOn1 || alarmOn2){play(hertz[i], wait[i]);}
   }
   updateTimeBySeconds((millis()-alarmTime)/1000);
   
