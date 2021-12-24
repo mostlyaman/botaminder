@@ -153,9 +153,9 @@ def googlecalendar():
             if not page_token:
                 break
 
-    current_date = datetime.date.today()
-    start_date = datetime.datetime(current_date.year, current_date.month, current_date.day, 00, 00, 00, 0).isoformat() + 'Z'
-    end_date = datetime.datetime(current_date.year, current_date.month, current_date.day, 23, 59, 59, 0).isoformat() + 'Z'
+    dt = datetime.datetime.now()
+    start_date = datetime.datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, 0).isoformat() + 'Z'
+    end_date = datetime.datetime(dt.year, dt.month, dt.day, 23, 59, 59, 0).isoformat() + 'Z'
  
     for calendar_id in calendar_ids:
         count = 0
