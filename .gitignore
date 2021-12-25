@@ -9,4 +9,4 @@ __pycache__/
 *.pyo
 
 #User Generated profiles
-/src/profiles/
+/src/profiles/*.txt
