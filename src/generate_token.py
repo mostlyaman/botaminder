@@ -31,7 +31,7 @@ def manual():
         lt=(time.localtime(time.time())[3:6])
         profname=input('enter the profile name:')
         profiles=os.listdir(os.path.join(os.getcwd(),'profiles'))
-        profiles.pop(profiles.index('.gitignore.txt'))
+        profiles.pop(profiles.index('.gitkeep'))
         def writing():
             no=int(input('enter the number of events: '))
             for i in range(no):
@@ -80,7 +80,7 @@ def manual():
     
     def chooseprofile():
         profiles= os.listdir(str(os.path.join(os.getcwd(),'profiles')))
-        profiles.pop(profiles.index('.gitignore.txt'))
+        profiles.pop(profiles.index('.gitkeep'))
         count=1
         print('select the profile from the list below:\n')
         for i in profiles:
@@ -103,7 +103,7 @@ def manual():
     profileoption= input('select the option:') 
     if profileoption=='1' or profileoption=='choose a profile':
         profiles=os.listdir(str(os.getcwd())+'\profiles')
-        profiles.pop(profiles.index('.gitignore.txt'))
+        profiles.pop(profiles.index('.gitkeep'))
         if not profiles:
             print('\n\nno profiles found try again\n\n')
             manual()
