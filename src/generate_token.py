@@ -86,7 +86,10 @@ def manual():
         for i in profiles:
             print(str(count)+'. '+i)
             count+=1
-        profname=int(input('enter the number of the profile:'))
+        try:
+            profname=int(input('enter the number of the profile:'))
+        except ValueError:
+            raise Exception('You entered the wrong input. Enter option number of the profile.Not the profile name.\nBetter luck next time.')
         if profname-1 < len(profiles):
             file=open(os.path.join(os.getcwd(),'profiles',profiles[profname-1]))
             print(file.read())
@@ -227,19 +230,19 @@ def googlecalendar():
     calendar_ids = []
     count = 1
     while True:
-        calendar_list = service.calendarList().list(pageToken=page_token).execute()
+        calendar_list = service.calendarList().list(pageToken=page_token).execute()['items'][0:-2]
         print("\nThe following calendars are available in your google account. Please select one:\n\
         (Note: The calendar name is your email, if you do not have multiple calendars)\n")
-        for calendar_list_entry in calendar_list['items']:
+        for calendar_list_entry in calendar_list:
             print(count, calendar_list_entry['id'])
             count+=1
             print('\n')
         calendar_id = input("Please enter one of the above or enter 1,2,3 to select: ").strip()
         
         if len(calendar_id) == 1:
-            calendar_ids.append(calendar_list['items'][int(calendar_id)-1]['id'])
+            calendar_ids.append(calendar_list[int(calendar_id)-1]['id'])
         else:
-            for calendar_list_entry in calendar_list['items']:
+            for calendar_list_entry in calendar_list:
                 if calendar_id in calendar_list_entry['id']:
                     calendar_ids.append(calendar_list_entry['id'])
         
