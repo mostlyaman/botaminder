@@ -8,3 +8,5 @@ __pycache__/
 # Optimized Python bytecode file
 *.pyo
 
+#User Generated profiles
+/src/profiles/
