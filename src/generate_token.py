@@ -230,7 +230,8 @@ def googlecalendar():
     calendar_ids = []
     count = 1
     while True:
-        calendar_list = service.calendarList().list(pageToken=page_token).execute()['items'][0:-2]
+        calendar_list1= service.calendarList().list(pageToken=page_token).execute()
+        calendar_list = calendar_list1['items'][0:-2]
         print("\nThe following calendars are available in your google account. Please select one:\n\
         (Note: The calendar name is your email, if you do not have multiple calendars)\n")
         for calendar_list_entry in calendar_list:
@@ -251,7 +252,7 @@ def googlecalendar():
                      + NO SUCH CALENDAR FOUND. PLEASE SELECT ONE OF THE DISPLAYED IDS+
                      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++''')
         else:
-            page_token = calendar_list.get('nextPageToken')
+            page_token = calendar_list1.get('nextPageToken')
             if not page_token:
                 break
 
